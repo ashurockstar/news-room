@@ -2,9 +2,21 @@ import React, { Component } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
 import InfiniteScroll from 'react-infinite-scroll-component';
-
+import PropTypes from 'prop-types';
 export default class News extends Component {
     articles = [];
+
+    static defaultProps = {
+        country: 'in',
+        pageSize: 8,
+        category: 'general'
+    }
+
+    static propTypes = {
+        country: PropTypes.string,
+        pageSize: PropTypes.number,
+        category: PropTypes.string
+    }
 
     constructor(props) {
         super(props);
