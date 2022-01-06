@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
-
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default class News extends Component {
     articles = [];
@@ -39,63 +39,91 @@ export default class News extends Component {
     }
 
     updateNews = async () => {
+        this.props.setProgress(30);
         this.setState({ loading: true });
-        let data = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=05f4210c2cb84fff862be60fc36d1f93&page=${this.state.page}&pageSize=${this.props.pageSize}`)
+        let data = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apikey}&page=${this.state.page}&pageSize=${this.props.pageSize}`)
+        this.props.setProgress(60);
         let parsedData = await data.json();
-        console.log(parsedData);
+        parsedData.articles = [...this.state.articles, ...parsedData.articles]
         this.setState({
             articles: parsedData.articles,
             totalResults: parsedData.totalResults,
             loading: false
         });
+        this.props.setProgress(100);
     }
 
     componentDidMount() {
         this.updateNews()
     }
-    handlePrevClick = () => {
-        console.log("Previous");
-        this.setState({ page: this.state.page - 1 }, () => {
-            this.updateNews();
-        });
-    }
 
-    handleNextClick = () => {
-        console.log("Next");
+    // Next and Prev Click
+    // handlePrevClick = () => {
+    //     console.log("Previous");
+    //     this.setState({ page: this.state.page - 1 }, () => {
+    //         this.updateNews();
+    //     });
+    // }
+
+    // handleNextClick = () => {
+    //     console.log("Next");
+    //     if (this.state.page + 1 <= Math.ceil(this.state.totalResults / this.props.pageSize)) {
+    //         this.setState({ page: this.state.page + 1 }, () => {
+    //             this.updateNews();
+    //         });
+    //     }
+    // }
+
+    fetchMoreData = () => {
+        console.log("Infinite Scroll Called")
         if (this.state.page + 1 <= Math.ceil(this.state.totalResults / this.props.pageSize)) {
-            this.setState({ page: this.state.page + 1 }, () => {
+            this.setState({page: this.state.page + 1}, () => {
                 this.updateNews();
-            });
+            })
         }
-    }
+    };
+
     render() {
+        console.log(this.state)
         return (
-            <div className='container'>
+            <>
                 <h1 className='text-center' style={{ margin: "35px 0px" }}>
                     NewsHour - Latest {this.capitatlize(this.props.category)} News </h1>
                 {this.state.loading && <Spinner />}
-                <div className='row my-3'>
-                    {!this.state.loading && this.state.articles.map(item => {
-                        return (
-                            <div className='col-md-4' key={item.url}>
-                                <NewsItem
-                                    title={item.title}
-                                    description={item.description}
-                                    imageUrl={item.urlToImage}
-                                    newsUrl={item.url}
-                                    author={item.author}
-                                    date={item.publishedAt}
-                                    source={item.source.name} />
-                            </div>
-                        );
-                    })}
-                </div>
+                <InfiniteScroll
+                    dataLength={this.state.articles.length}
+                    next={this.fetchMoreData}
+                    hasMore={this.state.articles.length !== this.state.totalResults}
+                    loader={<Spinner />}
+                >
+                    <div className='container'>
+                        <div className='row my-3'>
+                            {this.state.articles.map(item => {
+                                return (
+                                    <div className='col-md-4' key={item.url}>
+                                        <NewsItem
+                                            title={item.title}
+                                            description={item.description}
+                                            imageUrl={item.urlToImage}
+                                            newsUrl={item.url}
+                                            author={item.author}
+                                            date={item.publishedAt}
+                                            source={item.source.name} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </InfiniteScroll>
+
+
+                {/* Removing Next and Previous Due to introduction of Infinite scroll
                 <div className='d-flex justify-content-between my-3'>
                     <button disabled={this.state.page === 1} type="button" className="btn btn-info" onClick={this.handlePrevClick}>&larr; Previous</button>
                     <button type="button" className="btn btn-info" onClick={this.handleNextClick}>Next &rarr;</button>
-                </div>
+                </div> */}
                 {/* This is a news component */}
-            </div>
+            </>
         )
     }
 }
