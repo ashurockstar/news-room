@@ -1,5 +1,5 @@
 import './App.css';
-
+import Login from "./containers/Login";
 import React, { Component } from 'react'
 import Navbar from './component/Navbar';
 import News from './component/News';
@@ -40,6 +40,7 @@ export class App extends Component {
             <Route exact path="/science" ><News setProgress={this.setProgress} apikey={this.apikey} key="science" pageSize={this.pageSize} country="in" category="science" /></Route>
             <Route exact path="/sports" ><News setProgress={this.setProgress} apikey={this.apikey} key="sports" pageSize={this.pageSize} country="in" category="sports" /></Route>
             <Route exact path="/technology" ><News setProgress={this.setProgress} apikey={this.apikey} key="technology" pageSize={this.pageSize} country="in" category="technology" /></Route>
+            <Route exact path="/login"><Login /></Route>;
           </Switch>
         </div>
       </Router>
